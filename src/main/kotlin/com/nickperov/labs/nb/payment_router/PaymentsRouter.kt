@@ -99,6 +99,7 @@ class PaymentsRouter(@ConfigProperty(name = "payment.processor.url") private val
         // Processing using RxJava
         paymentsBatch.payments.toFlowable()
             .flatMap({ payment ->
+                log.info("Executing payment ${payment.reference}")
                 Flowable.fromCompletionStage(paymentResource.processPaymentAsync(payment))
                     .map { Pair(it, payment) }
                     .doOnError { e ->

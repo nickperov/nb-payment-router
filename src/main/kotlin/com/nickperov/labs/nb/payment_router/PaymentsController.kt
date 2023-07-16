@@ -4,10 +4,14 @@ import jakarta.enterprise.inject.Default
 import jakarta.inject.Inject
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
+import org.jboss.logging.Logger
 import java.math.BigDecimal
 
 @Path("payments")
 class PaymentsController {
+
+    @Inject
+    private lateinit var log: Logger
 
     enum class Router {
         SEQ, PARALLEL_STREAM, PARALLEL_FIX_100, PARALLEL_NO_LIM, ASYNC, REACTIVE, COROUTINES, VIRTUAL_THREADS
@@ -34,7 +38,7 @@ class PaymentsController {
                 Router.VIRTUAL_THREADS -> paymentsRouter.processPaymentsGreenThreads(paymentsBatch)
             }
         } catch (e: RuntimeException) {
-            e.printStackTrace()
+            log.error("Failed to process payments batch", e)
             PaymentsBatchProcessResultDTO(BatchProcessingResult.ERROR, BigDecimal.ZERO, emptyList())
         }
     }
